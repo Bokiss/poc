@@ -1,0 +1,45 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/bookworm64"
+  config.vm.box_version = "12.20240905.1"
+
+  vms = [
+    { name: "vm.manager", hostname: "vm.manager", ip: "192.168.56.10" },
+    { name: "vm.worker1", hostname: "vm.worker1", ip: "192.168.56.11" },
+    { name: "vm.worker2", hostname: "vm.worker2", ip: "192.168.56.12" },
+    { name: "vm.worker3", hostname: "vm.worker3", ip: "192.168.56.13" },
+    { name: "vm.worker4", hostname: "vm.worker4", ip: "192.168.56.14" }
+  ]
+
+  vms.each do |vm|
+    config.vm.define vm[:name] do |node|
+      node.vm.hostname = vm[:hostname]
+      node.vm.network "private_network", ip: vm[:ip]
+
+      # Install Chef Client
+      node.vm.provision "shell", inline: <<-SHELL
+        if ! command -v chef-client &> /dev/null; then
+          curl -L https://www.chef.io/chef/install.sh | sudo bash
+        fi
+      SHELL
+
+      # Install Ruby, RubyGems, and development tools
+      node.vm.provision "shell", inline: <<-SHELL
+        sudo apt-get update
+        sudo apt-get install -y ruby-full build-essential
+        sudo gem install berkshelf
+      SHELL
+
+      # Install cookbooks via berks
+      node.vm.provision "shell", inline: <<-SHELL
+        cd /vagrant
+        berks install
+      SHELL
+
+      # Run Chef Client
+      node.vm.provision "chef_solo" do |chef|
+        chef.cookbooks_path = "./cookbooks"
+        chef.run_list = ["recipe[swarm-init]"]
+      end
+    end
+  end
+end

@@ -103,7 +103,7 @@ services:
         window: 120s
       placement:
         constraints:
-          - node.label.GRAFANA_HOST == true
+          - node.id==uicxt8qjqygevq6we5jeg2a11
     ports:
       - "3000:3000"
     volumes:
@@ -122,6 +122,9 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+      placement:
+        constraints:
+          - node.id==uicxt8qjqygevq6we5jeg2a11
       restart_policy:
         condition: on-failure
         delay: 10s

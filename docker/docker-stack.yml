@@ -135,6 +135,24 @@ services:
     volumes:
       - influxdb_data:/var/lib/influxdb
 
+  telegraf:
+    image: telegraf
+    networks:
+      - all
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      - influx
+    ports:
+      - "8125:8125"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    configs:
+      - source: telegraf-conf2
+        target: /etc/telegraf/telegraf.conf
+
 networks:
   all:
     driver: overlay
@@ -144,6 +162,8 @@ configs:
     file: ./redis-master.conf
   redis-slave-conf:
     file: ./redis-slave.conf
+  telegraf-conf2:
+    file: ./telegraf.conf
 
 volumes:
   db-data:

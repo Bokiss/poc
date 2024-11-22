@@ -1,0 +1,43 @@
+###############################
+# Steps to automate with Chef #
+###############################
+
+
+##### SWARM #####
+init swarm
+join workers and managers
+drain 1 manager
+deploy stack #docker stack deploy -c docker-stack.yml poc
+
+##### TIG #####
+
+## Grafana ##
+add label to 1 vm to be dedicated monitoring host
+docker node update --label-add GRAFANA_HOST=true <NODE_NAME>
+# verify label
+docker node inspect <NODE_NAME> --format '{{ .Spec.Labels }}'
+
+# Create the persistent storage at the vm which will host grafana
+docker volume create grafana_data
+
+## Influx ##
+
+# Create the persistent storage at the vm which will host influx
+docker volume create influxdb_data
+
+#whocaresleakingalocaltoken
+# connect grafana <-> influx
+# RO5WRBpMNRmJMV_0yU3XQx7sZKyNgRR5RPWxSaL5VIfOGj6M2ZXvYCNAQh7stxqBfCG_FxH6hP97dP-6QBBALg==
+
+# Create user + token for telegraf
+# Update telegraf conf with login credentials
+# telegraf h83Pc88ZazXUWa4qOONY8QukqTQpUc7mmoYHmmy9JYTSyTi33byH3lvEou8TuNNi04G1lacWZChpLUPkQ8SEMA==
+
+## Telegraf ##
+create a docker config with telegraf configratuon
+
+
+
+##### ELK #####
+add label to 1 vm to be dedicated logging host
+docker node update --label-add ELK_HOST=true <NODE_NAME>
